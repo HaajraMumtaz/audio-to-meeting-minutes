@@ -9,7 +9,7 @@ DEFAULT_RMS_TARGET_DBFS = -20
 MAX_INT16 = 32767
 
 from structures import AudioSegment
-
+import numpy as nd
 
 def _ensure_wav_16k_mono_16bit(seg: AudioSegment) -> AudioSegment:
     seg = seg.set_channels(TARGET_CHANNELS)
@@ -34,3 +34,9 @@ def standardize_audio(in_path: str | Path, out_path: Optional[str | Path] = None
 
     audio.export(out_path, format="wav") # save as clean WAV
     return out_path
+def _audiosegment_to_numpy(seg: AudioSegment) -> np.ndarray:
+"""Convert pydub AudioSegment to numpy int16 array (mono)."""
+    samples = np.array(seg.get_array_of_samples())
+    if seg.channels > 1:
+        samples = samples.reshape((-1, seg.channels)).mean(axis=1)
+    return samples.astype(np.int16)
